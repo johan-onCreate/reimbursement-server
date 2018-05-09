@@ -1,12 +1,12 @@
 var bodyParser = require('body-parser')
 var jsonParser = bodyParser.json()
+var UserModel  = require('./models/user')
+var User = UserModel.user
 
 const appRoutes = function(app) {
-  app.get('/', function (req, res) {
-    //console.log('response', res)
-    //console.log('request', req)
-    console.log('get')
-    res.send('hello world')
+  app.get('/getusers', function (req, res) {
+    User.findOne
+    res.send()
   })
 
   app.post('/authenticate', jsonParser, function(req, res) {
@@ -17,8 +17,7 @@ const appRoutes = function(app) {
     } else {
       var data = {status: 200, validEmail: false}
     }
-    res.send(JSON.stringify(data))
-    
+    res.send(JSON.stringify(data))  
   })
 }
 
