@@ -11,7 +11,7 @@ Mongodb, Node.js
 
 also:
 ```
-git clone derpa
+git clone git@github.com:michaelsohl/reimbursement-server.git
 ```
 && 
 ```
