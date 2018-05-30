@@ -18,7 +18,8 @@ const appRoutes = function(app) {
       console.log('demo går så bra:', user.expenses)
       res.send(JSON.stringify(user))
       if(err){
-        res.send('BAD RESPONSE')
+        let res = {response: 'Error 1'}
+        res.send(JSON.stringify(res))
         }
       })
     })
@@ -26,21 +27,38 @@ const appRoutes = function(app) {
   app.post('/authenticate', jsonParser, function(req, res) {
     console.log('post, /authenticate, body:', req.body)
     var email = req.body.email
+    let data
     if(email.match('@sylog.se$')){
       User.findOne({ email }, function(err, user) {
         if(err){
-          console.log('BAD RESPONSE')
-          res.send('BAD RESPONSE')
+          data = {data: 'BAD RESPONSE'}
+          res.send(JSON.stringify(data))
           }
-        let data = {validEmail: true, userId: user._id}
+        data = {validEmail: true, userId: user._id}
         console.log('data:', data)
         res.send(JSON.stringify(data))
       })
      
     } else {
-      let data = {validEmail: false}
+      data = {validEmail: false}
       res.send(JSON.stringify(data))
     }
+  })
+  
+  app.post('/addexpense', jsonParser, function(req, res) {
+    console.log('post, /addexpense, body:', req.body)
+    var userId = req.body._id
+    let expense = {date: new Date('2018-04-29T11:16:36.858Z'), car_type: req.body.expensesProp.car_type, km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client}
+    let data
+    User.findOneAndUpdate({ userId }, { $push: { expenses: expense } }, function (err, success) {
+      if (err) {
+        data = {resp: 'Error'}
+        res.send(JSON.stringify(data))
+      } else {
+        data = {resp: 'OK'}
+        res.send(JSON.stringify(data))
+      }
+    })
   })
 }
 
