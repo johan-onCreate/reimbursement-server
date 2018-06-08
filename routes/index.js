@@ -5,6 +5,8 @@ var User = UserModel.user
 var mongoose = require('mongoose')
 var jwt = require('jsonwebtoken')
 var _ = require('lodash')
+var moment = require('moment')
+
 
 const appRoutes = function(app) {
 
@@ -12,12 +14,19 @@ const appRoutes = function(app) {
     // var expenses = { data: [] }
     console.log('post, /getexpenses, body:', req.body.userId)
     var userId = req.body.userId
+    console.log(userId)
     var resp = []
     User.findOne({ _id : userId }, function(err, user) {
-      console.log('User:', user)
-      console.log('demo går så bra:', user.expenses)
-      res.send(JSON.stringify(user))
+      console.log(user)
+      if(!user) {
+        console.log(1)
+        res.send(JSON.stringify({expenses: resp}))
+      } else {
+        console.log(2)
+        res.send(JSON.stringify(user))
+      }
       if(err){
+        console.log(3)
         let res = {response: 'Error 1'}
         res.send(JSON.stringify(res))
         }
@@ -48,7 +57,7 @@ const appRoutes = function(app) {
   app.post('/addexpense', jsonParser, function(req, res) {
     console.log('post, /addexpense, body:', req.body)
     var userId = req.body._id
-    let expense = {date: new Date('2018-04-29T11:16:36.858Z'), car_type: req.body.expensesProp.car_type, km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client}
+    let expense = {date: moment(req.body.expensesProp.date.timestamp).local().toDate(), car_type: req.body.expensesProp.car_type, km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client}
     let data
     User.findOneAndUpdate({ userId }, { $push: { expenses: expense } }, function (err, success) {
       if (err) {
