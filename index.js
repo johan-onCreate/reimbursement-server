@@ -26,3 +26,27 @@ var auser = new User({
  auser.save((error) => { 
   if (error) console.log('error:', error)})
  */
+/**
+ * var connectedDb = db.connect('mongodb://localhost/REIMBURSE_DB')
+var auser = new User({
+  _id: new db.Types.ObjectId(),
+  name: 'Fredrik Landberg',
+  email: 'fredrik.landberg@sylog.se',
+  admin: true,
+  expenses: []
+})
+ auser.save((error) => { 
+  if (error) console.log('error:', error)})
+ */
+
+ /**
+ *  fredrik: 5b30d3f179c424a80b44a5b5 (admin)
+ *  michael: 5b30e72932d80ead0854dc9f
+  * User.findOneAndUpdate({ _id: '5b30e72932d80ead0854dc9f' }, { $set: { expenses: [] } }, function (err, success) {
+  if (err) {
+    console.log('something went wrong!')
+  }
+
+})
+  * 
+  */

@@ -7,7 +7,7 @@ var userSchema = Schema({
   name: String,
   email: String,
   admin: Boolean,
-  expenses: [{date: Date, car_type: String, km: Number, route_descr: String, attest: Boolean, client: String}]
+  expenses: [{date: Date, car_type: String, km: Number, route_descr: String, attest: Boolean, client: String, userId: String}]
 })
 
 const UserDb = mongoose.model('User', userSchema)
