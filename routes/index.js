@@ -23,22 +23,17 @@ const appRoutes = function(app) {
     var resp = {}
     User.findOne({ _id : userId }, function(err, user) {
       if(err){
-        console.log(3)
         let res = {response: 'Error 1'}
         res.send(JSON.stringify(resp))
         }
-        console.log(2)
         admin = user.admin
         console.log('admin:', admin)
         resp = Object.assign({}, user.toObject(), form)
         console.log('resp:', resp)
         var userMap = {}
         if (admin) {
-          console.log(4)
           User.find({}, function(error, users) {
-            console.log(5)
             users.forEach(function(user){
-              console.log(6)
               if (user._id != userId) {
                 resp.expenses = resp.expenses.concat(user.expenses)
               }
@@ -48,10 +43,7 @@ const appRoutes = function(app) {
       } else {
         res.send(JSON.stringify(resp))
       }
-        console.log(8)
       })
-      console.log(9)
-      
     })
 
   app.post('/authenticate', jsonParser, function(req, res) {
@@ -78,14 +70,12 @@ const appRoutes = function(app) {
   app.post('/addexpense', jsonParser, function(req, res) {
     console.log('post, /addexpense, body:', req.body)
     var userId = req.body.userId
-    let expense = {date: moment(req.body.expensesProp.date.timestamp).local().toDate(), car_type: req.body.expensesProp.car_type, km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client, userId}
-    let data
-    console.log('userId:', userId)
+    var expense = {date: moment(req.body.expensesProp.date.timestamp).local().toDate(), car_type: req.body.expensesProp.car_type, km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client, userId}
+    var data
     User.findOneAndUpdate({ _id: userId }, { $push: { expenses: expense } }, function (err, success) {
       if (err) {
         let feedback = feedbackWhenError(req.body.expensesProp)
         data = {resp: 'Error', feedback}
-
         console.log('DET BLEV FEL')
         res.send(JSON.stringify(data))
       } else {
@@ -94,6 +84,34 @@ const appRoutes = function(app) {
       }
     })
   })
+
+  app.post('/toggleexpense', jsonParser, function(req, res){
+    console.log('post, /toggleattest:', req.body)
+    var data
+    var userId = req.body.userId
+    var expenseId = req.body.expenseId
+    User.findOne({ _id: userId }, function(err, user){
+      if(err){
+        data = {data: 'BAD RESPONSE'}
+        res.send(JSON.stringify(data))
+      }
+      user.expenses.forEach(elem => {
+        console.log(elem)
+        console.log(elem.id)
+        console.log(expenseId)
+        if(elem._id == expenseId){
+          console.log('3')
+        User.findOneAndUpdate({ 'expenses._id': expenseId }, { $set: {'expenses.$.attest': !elem.attest } }, function(err,success){
+          if(err) {
+            data = {data: 'BAD RESPONSE'}
+            res.send(JSON.stringify(data))
+          }
+          res.send(JSON.stringify({data: 'OK'}))
+        })
+        } 
+      })
+    })
+})
 }
 
 function feedbackWhenError (expenseForm) {
