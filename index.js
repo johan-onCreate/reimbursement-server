@@ -7,7 +7,7 @@ var User = UserModel.user
 const port = 3000
 
 var connectedDb = db.connect('mongodb://localhost/REIMBURSE_DB')
-
+  
 appRoutes(app, connectedDb)
 app.listen(port)
 console.log('Server is now running on:', port)
@@ -33,7 +33,8 @@ var auser = new User({
   name: 'Fredrik Landberg',
   email: 'fredrik.landberg@sylog.se',
   admin: true,
-  expenses: []
+  expenses: [],
+  password: 1234
 })
  auser.save((error) => { 
   if (error) console.log('error:', error)})

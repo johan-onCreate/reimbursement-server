@@ -6,6 +6,8 @@ var mongoose = require('mongoose')
 var jwt = require('jsonwebtoken')
 var _ = require('lodash')
 var moment = require('moment')
+var db = require('mongoose')
+var bcrypt = require('bcrypt')
 // var form = require('../form_data/expenses-form')
 
 const form = {
@@ -49,30 +51,32 @@ const appRoutes = function(app) {
   app.post('/authenticate', jsonParser, function(req, res) {
     console.log('post, /authenticate, body:', req.body)
     var email = req.body.email
+    var password = req.body.password
     let data
+    let pass
     if(email.match('@sylog.se$')){
       User.findOne({ email }, function(err, user) {
         if(err){
           data = {data: 'BAD RESPONSE'}
           res.send(JSON.stringify(data))
           }
-        data = {validEmail: true, userId: user._id}
-        console.log('data:', data)
-        res.send(JSON.stringify(data))
+        data = { validEmail: true, userId: user._id }
+        comparePasswords(password, user, data ,res)
       })
      
     } else {
-      data = {validEmail: false}
+      data = { validEmail: false }
       res.send(JSON.stringify(data))
     }
   })
   
   app.post('/addexpense', jsonParser, function(req, res) {
     console.log('post, /addexpense, body:', req.body)
-    var userId = req.body.userId
-    var expense = {date: moment(req.body.expensesProp.date.timestamp).local().toDate(), car_type: req.body.expensesProp.car_type, km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client, userId}
+    var expense = {date: moment(req.body.expensesProp.date.timestamp).local().toDate(), car_type: req.body.expensesProp.carType, 
+                    km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client, 
+                    userId: req.body.expensesProp.userId, name: req.body.expensesProp.name }
     var data
-    User.findOneAndUpdate({ _id: userId }, { $push: { expenses: expense } }, function (err, success) {
+    User.findOneAndUpdate({ '_id' : req.body.expensesProp.userId }, { $push: { expenses: expense } }, function (err, success) {
       if (err) {
         let feedback = feedbackWhenError(req.body.expensesProp)
         data = {resp: 'Error', feedback}
@@ -112,7 +116,57 @@ const appRoutes = function(app) {
       })
     })
 })
+
+  app.post('/createaccount', jsonParser, function(req, res) {
+    console.log('post, /createaccount:', req.body)
+    var data
+    var email = req.body.email
+    var password = req.body.password
+    var name
+    if(email) {
+      let matchResp = email.match(/([a-z]+)\.([a-z]+)/)
+      let fn = matchResp[1]
+      let ln = matchResp[2]
+      if(matchResp.length > 2) {
+        name = fn[0].toUpperCase() + fn.slice(1, fn.length) + ' ' + ln[0].toUpperCase() + ln.slice(1, ln.length)
+      }
+    }
+
+    var auser = new User({
+      _id: new db.Types.ObjectId(),
+      name,
+      email,
+      admin: false,
+      expenses: [],
+      password
+    })
+    
+    console.log('blev det något?:', auser)
+    auser.save((error) => { 
+      if (error) console.log('error:', error)})
+    
+    res.send(JSON.stringify({data: 'OK'}))
+  })
 }
+
+
+function comparePasswords (text, user, data, res) {
+  // test a matching password
+  user.comparePassword(text, function(err, isMatch) {
+    if (err) throw err
+    // console.log('Password123:', isMatch) // -> Password123: true
+    if (isMatch) {
+      console.log('match!')
+      res.send(JSON.stringify(data))
+    } else {
+      console.log('false match!')
+      data.validEmail = false
+      // data.validEmail
+      res.send(JSON.stringify(data))
+    }
+  })
+}
+
 
 function feedbackWhenError (expenseForm) {
   // check km, if Integer

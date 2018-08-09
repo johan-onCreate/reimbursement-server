@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/michaelsohl/reimbursement-server#readme",
   "dependencies": {
+    "bcrypt": "^3.0.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
     "jsonwebtoken": "^8.2.1",
