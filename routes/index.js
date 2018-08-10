@@ -117,6 +117,37 @@ const appRoutes = function(app) {
     })
 })
 
+app.post('/updateexpense', jsonParser, function(req, res) {
+  console.log('post, /toggleattest:', req.body)
+  var data
+  var userId = req.body.userId
+  var expenseId = req.body.expenseId
+  var expenseProps = req.body.expenseProps
+
+  User.findOne({ _id: userId }, function(err, user){
+    if(err){
+      data = {data: 'BAD RESPONSE'}
+      res.send(JSON.stringify(data))
+    }
+    user.expenses.forEach(elem => {
+      console.log(elem)
+      console.log(elem.id)
+      console.log(expenseId)
+      if(elem._id == expenseId){
+        console.log('3')
+      User.findOneAndUpdate({ 'expenses._id': expenseId },{ $set: {'expense.$.date': expenseProps.date}, $set: {'expense.$.car_type': expenseProps.car_type},
+                        $set: {'expense.$.km': expenseProps.km },  $set: {'expense.$.route_descr': expenseProps.route_descr }, $set: {'expense.$.client': expenseProps.client } }, function(err,success){ 
+        if(err) {
+          data = {data: 'BAD RESPONSE'}
+          res.send(JSON.stringify(data))
+        }
+        res.send(JSON.stringify({data: 'OK'}))
+      })
+      } 
+    })
+  })
+})
+
   app.post('/createaccount', jsonParser, function(req, res) {
     console.log('post, /createaccount:', req.body)
     var data
