@@ -11,7 +11,7 @@ var bcrypt = require('bcrypt')
 // var form = require('../form_data/expenses-form')
 
 const form = {
-  car_type: ['Egen bil', 'Företagsbil diesel', 'Företagsbil bensin']
+  car_types: ['Egen bil', 'Företagsbil diesel', 'Företagsbil bensin']
 }
 
 const appRoutes = function(app) {
@@ -69,10 +69,10 @@ const appRoutes = function(app) {
       res.send(JSON.stringify(data))
     }
   })
-  
+ 
   app.post('/addexpense', jsonParser, function(req, res) {
     console.log('post, /addexpense, body:', req.body)
-    var expense = {date: moment(req.body.expensesProp.date.timestamp).local().toDate(), car_type: req.body.expensesProp.carType, 
+    var expense = {date: moment(req.body.expensesProp.date).add(1, 'd').local('sv').toDate(), car_type: req.body.expensesProp.carType, 
                     km: req.body.expensesProp.km, route_descr: req.body.expensesProp.route_descr, attest: false, client: req.body.expensesProp.client, 
                     userId: req.body.expensesProp.userId, name: req.body.expensesProp.name }
     var data
@@ -118,7 +118,7 @@ const appRoutes = function(app) {
 })
 
 app.post('/updateexpense', jsonParser, function(req, res) {
-  console.log('post, /toggleattest:', req.body)
+  console.log('post, /updateexpense:', req.body)
   var data
   var userId = req.body.userId
   var expenseId = req.body.expenseId
@@ -130,21 +130,36 @@ app.post('/updateexpense', jsonParser, function(req, res) {
       res.send(JSON.stringify(data))
     }
     user.expenses.forEach(elem => {
-      console.log(elem)
-      console.log(elem.id)
-      console.log(expenseId)
       if(elem._id == expenseId){
-        console.log('3')
-      User.findOneAndUpdate({ 'expenses._id': expenseId },{ $set: {'expense.$.date': expenseProps.date}, $set: {'expense.$.car_type': expenseProps.car_type},
-                        $set: {'expense.$.km': expenseProps.km },  $set: {'expense.$.route_descr': expenseProps.route_descr }, $set: {'expense.$.client': expenseProps.client } }, function(err,success){ 
+      User.findOneAndUpdate({ 'expenses._id': expenseId },{ $set: {'expenses.$.date': moment(expenseProps.date).add(1, 'd').local('sv').toDate(), 'expenses.$.car_type': expenseProps.carType, 
+                              'expenses.$.km': expenseProps.km, 'expenses.$.route_descr': expenseProps.route_descr, 'expenses.$.client': expenseProps.client }} , function(err,success){ 
+
         if(err) {
           data = {data: 'BAD RESPONSE'}
           res.send(JSON.stringify(data))
+        } else {
+          res.send(JSON.stringify({data: 'OK'}))
         }
-        res.send(JSON.stringify({data: 'OK'}))
       })
       } 
     })
+  })
+})
+
+app.post('/removeexpense', jsonParser, function(req, res) {
+  // array of expense id:n with corresponding userIdn
+  console.log('post, /removeexpense:', req.body)
+  var data 
+  var userId = req.body.userId
+  var expenseId = req.body.expenseId
+  
+  User.findOneAndUpdate({ _id : userId}, { $pull: { expenses: { _id: expenseId }}}, function(error, resp) {
+    if(error){
+      data = {data: 'BAD RESPONSE'}
+      res.send(JSON.stringify(data))
+    } else{ 
+      res.send(JSON.stringify({data: 'OK'}))
+    }
   })
 })
 
