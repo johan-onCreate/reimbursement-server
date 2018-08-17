@@ -21,7 +21,6 @@ const appRoutes = function(app) {
     var admin
     console.log('post, /getexpenses, body:', req.body)
     var userId = req.body.userId
-    console.log(userId)
     var resp = {}
     User.findOne({ _id : userId }, function(err, user) {
       if(err){
@@ -193,6 +192,62 @@ app.post('/removeexpense', jsonParser, function(req, res) {
     
     res.send(JSON.stringify({data: 'OK'}))
   })
+
+  app.post('/addfavorite', jsonParser, function(req, res) {
+    console.log('post, /addfavorite:', req.body)
+    var data
+    var favoriteProps = req.body.favoriteProps
+    var userId = req.body.userId
+
+    User.findOneAndUpdate({ '_id' : userId }, { $push: { favorites: favoriteProps } }, function (err, success) {
+      if (err) {
+        let feedback = feedbackWhenError(req.body.expensesProp)
+        data = {resp: 'Error', feedback}
+        console.log('DET BLEV FEL')
+        res.send(JSON.stringify(data))
+      } else {
+        data = {resp: 'OK'}
+        res.send(JSON.stringify(data))
+      }
+    })
+  })
+
+  app.post('/getfavorites', jsonParser, function(req, res){
+    // console.log('post, /getfavorite:', req.body)
+    var data 
+    var userId = req.body.userId
+    User.findOne({ '_id' : userId }, function(err, user) {
+      if(err){
+        data = {response: 'Error 1'}
+        // console.log('apa:', user.favorites)
+        res.send(JSON.stringify(data))
+        } 
+        // console.log('apa2:', user.favorites)
+        let obj = user.toObject()
+        data = { favorites: obj.favorites }
+        res.send(JSON.stringify(data))
+        // resp = Object.assign({}, user.toObject(), form)
+        // console.log('resp:', resp)
+      })
+  })
+
+  app.post('/removefavorite', jsonParser, function(req, res) {
+    // array of expense id:n with corresponding userIdn
+    console.log('post, /removeexpense:', req.body)
+    var data 
+    var userId = req.body.userId
+    var favoriteId = req.body.favoriteId
+    
+    User.findOneAndUpdate({ _id : userId}, { $pull: { favorites: { _id: favoriteId }}}, function(error, resp) {
+      if(error){
+        data = {data: 'BAD RESPONSE'}
+        res.send(JSON.stringify(data))
+      } else{ 
+        res.send(JSON.stringify({data: 'OK'}))
+      }
+    })
+  })
+
 }
 
 

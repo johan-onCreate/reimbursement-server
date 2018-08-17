@@ -9,7 +9,8 @@ var userSchema = Schema({
   email: String,
   admin: Boolean,
   expenses: [{date: Date, car_type: String, km: Number, route_descr: String, attest: Boolean, client: String, userId: String, name: String}],
-  password: String
+  password: String,
+  favorites: [{car_type: String, km: Number, route_descr: String, nick: String, client: String }]
 })
 
 userSchema.pre('save', function(next) {
@@ -31,9 +32,9 @@ userSchema.pre('save', function(next) {
 
 userSchema.methods.comparePassword = function(candidatePassword, cb) {
   bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
-      if (err) return cb(err);
-      cb(null, isMatch);
-  });
+      if (err) return cb(err)
+      cb(null, isMatch)
+  })
 }
 
 const UserDb = mongoose.model('User', userSchema)
