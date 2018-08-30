@@ -8,6 +8,9 @@ var _ = require('lodash')
 var moment = require('moment')
 var db = require('mongoose')
 var bcrypt = require('bcrypt')
+var pdf = require('../lib/pdf')
+var pdfcreator = pdf.pdfcreator
+
 // var form = require('../form_data/expenses-form')
 
 const form = {
@@ -56,15 +59,20 @@ const appRoutes = function(app) {
     if(email.match('@sylog.se$')){
       User.findOne({ email }, function(err, user) {
         if(err){
-          data = {data: 'BAD RESPONSE'}
+          data = { validEmail: false, reason: 'Du finns inte i databasen' }
           res.send(JSON.stringify(data))
           }
-        data = { validEmail: true, userId: user._id }
-        comparePasswords(password, user, data ,res)
+        if(user._id) {
+          data = { validEmail: true, userId: user._id }
+          comparePasswords(password, user, data ,res)
+        } else {
+          data = { validEmail: false, reason: 'Du finns inte i databasen' }
+          res.send(JSON.stringify(data))
+        }
       })
      
     } else {
-      data = { validEmail: false }
+      data = { validEmail: false, reason: 'Måste använda jobbmejlen'}
       res.send(JSON.stringify(data))
     }
   })
@@ -248,6 +256,74 @@ app.post('/removeexpense', jsonParser, function(req, res) {
     })
   })
 
+  app.post('/updatecomment', jsonParser, function(req, res) {
+    console.log('post, /updatecomment:', req.body)
+    var data
+    var userId = req.body.userId
+    var expenseId = req.body.expenseId
+    var comment = req.body.comment
+  
+    User.findOne({ _id: userId }, function(err, user){
+      if(err){
+        data = {data: 'BAD RESPONSE'}
+        res.send(JSON.stringify(data))
+      }
+      user.expenses.forEach(elem => {
+        if(elem._id == expenseId){
+        User.findOneAndUpdate({ 'expenses._id': expenseId },{ $set: {'expenses.$.comment': comment }} , function(err,success){ 
+          if(err) {
+            data = {data: 'BAD RESPONSE'}
+            res.send(JSON.stringify(data))
+          } else {
+            res.send(JSON.stringify({data: 'OK'}))
+          }
+        })
+        } 
+      })
+    })
+  })
+
+  app.post('/createpdf', jsonParser, function(req, res) {
+    console.log('post, /createpdf:', req.body)
+    var data
+    var date = {
+      year: req.body.year,
+      month: req.body.month
+    }
+
+    let matchedExpenses = []
+    if (date) {
+        User.find({}, function(err, user) {
+          console.log('user:', user)
+          // var pdfc = new pdfcreator
+          user.forEach(user => {
+            console.log('USER 1337:', user)
+            let userExpenses = { user: user.name, expenses : []}
+            user.expenses.forEach(expense => {
+              let elementDate = {
+                year: moment(expense.date).year(),
+                month: moment(expense.date).month() + 1
+              }
+
+              if (elementDate.year == date.year && elementDate.month == date.month) {
+                console.log('match')
+                userExpenses.expenses.push(expense)
+              } 
+
+            })
+            matchedExpenses.push(userExpenses)
+            console.log('matchedExpenses:', matchedExpenses)
+          })
+          var pdfc = new pdfcreator(matchedExpenses, date)
+          pdfc.generatePages()
+        })
+        data = {resp: 'OK'}
+        res.send(JSON.stringify(data))
+    } else {
+      data = {resp: 'NOT OK', feedback: 'Datum-datan var felaktig'}
+      res.send(JSON.stringify(data))
+    }
+  })
 }
 
 

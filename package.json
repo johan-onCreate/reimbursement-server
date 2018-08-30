@@ -21,10 +21,15 @@
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
+    "file-system": "^2.2.2",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0",
     "jsonwebtoken": "^8.2.1",
     "lodash": "^4.17.10",
     "moment": "^2.22.2",
     "mongoose": "^5.0.17",
-    "nodemailer": "^4.6.4"
+    "nodemailer": "^4.6.4",
+    "pdfkit": "^0.8.3",
+    "react-native-pdf-lib": "^0.2.0"
   }
 }

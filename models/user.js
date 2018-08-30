@@ -8,7 +8,7 @@ var userSchema = Schema({
   name: String,
   email: String,
   admin: Boolean,
-  expenses: [{date: Date, car_type: String, km: Number, route_descr: String, attest: Boolean, client: String, userId: String, name: String}],
+  expenses: [{date: Date, car_type: String, km: Number, route_descr: String, attest: Boolean, client: String, userId: String, name: String, comment: String}],
   password: String,
   favorites: [{car_type: String, km: Number, route_descr: String, nick: String, client: String }]
 })

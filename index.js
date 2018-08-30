@@ -1,3 +1,12 @@
+var fs = require('file-system');
+var https = require('https')
+/** 
+var options = {
+  key: fs.readFileSync('./ssl/csr.pem'),
+  cert: fs.readFileSync('./ssl/server.crt')
+}
+*/
+
 var express = require('express')
 var db = require('mongoose')
 var app = express()
@@ -10,6 +19,8 @@ var connectedDb = db.connect('mongodb://localhost/REIMBURSE_DB')
   
 appRoutes(app, connectedDb)
 app.listen(port)
+// const httpsServer= https.createServer(options, app)
+// httpsServer.listen(port)
 console.log('Server is now running on:', port)
 
 /**
