@@ -30,6 +30,7 @@
     "mongoose": "^5.0.17",
     "nodemailer": "^4.6.4",
     "pdfkit": "^0.8.3",
-    "react-native-pdf-lib": "^0.2.0"
+    "react-native-pdf-lib": "^0.2.0",
+    "sendmail": "^1.4.1"
   }
 }

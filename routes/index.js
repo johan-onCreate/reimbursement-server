@@ -8,6 +8,10 @@ var _ = require('lodash')
 var moment = require('moment')
 var db = require('mongoose')
 var bcrypt = require('bcrypt')
+var sendmail = require('sendmail')({
+  devHost:'localhost',
+  devPort: 3000
+})
 var pdf = require('../lib/pdf')
 var pdfcreator = pdf.pdfcreator
 
@@ -294,10 +298,10 @@ app.post('/removeexpense', jsonParser, function(req, res) {
     let matchedExpenses = []
     if (date) {
         User.find({}, function(err, user) {
-          console.log('user:', user)
+          // console.log('user:', user)
           // var pdfc = new pdfcreator
           user.forEach(user => {
-            console.log('USER 1337:', user)
+            // console.log('USER 1337:', user)
             let userExpenses = { user: user.name, expenses : []}
             user.expenses.forEach(expense => {
               let elementDate = {
@@ -306,16 +310,17 @@ app.post('/removeexpense', jsonParser, function(req, res) {
               }
 
               if (elementDate.year == date.year && elementDate.month == date.month) {
-                console.log('match')
+                // console.log('match')
                 userExpenses.expenses.push(expense)
               } 
 
             })
             matchedExpenses.push(userExpenses)
-            console.log('matchedExpenses:', matchedExpenses)
+            // console.log('matchedExpenses:', matchedExpenses)
           })
           var pdfc = new pdfcreator(matchedExpenses, date)
           pdfc.generatePages()
+          // <object width="400" height="400" data="helloworld.swf"></object>
         })
         data = {resp: 'OK'}
         res.send(JSON.stringify(data))
@@ -325,6 +330,22 @@ app.post('/removeexpense', jsonParser, function(req, res) {
     }
   })
 }
+
+/**
+ * sendmail({
+            from: 'no-reply@yourdomain.com',
+            to: 'micso796@live.com',
+            subject: 'test sendmail',
+            html: 'Mail of test sendmail ',
+            attachments: {
+              filename: '8-2018.pdf',
+              path: '../8-2018'
+            }
+          }, function(err, reply) {
+            console.log(err && err.stack);
+            console.dir(reply);
+        })
+ */
 
 
 function comparePasswords (text, user, data, res) {
